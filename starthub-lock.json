@@ -1,120 +1,77 @@
 {
-  "name": "do-get-droplet",
-  "description": "Get an existing droplet from Digital Ocean",
+  "name": "install-grafana",
+  "description": "Fetch Grafana installation script from GitHub and return the script content",
   "version": "0.0.1",
   "kind": "composition",
   "manifest_version": 1,
-  "repository": "github.com/tgirotto/do-get-droplet",
+  "repository": "github.com/tgirotto/install-grafana",
   "license": "MIT",
   "inputs": [
     {
-      "name": "droplet_config",
-      "type": "DigitalOceanDropletGetConfig",
+      "name": "script_url",
+      "description": "URL to the Grafana installation script",
+      "type": "string",
+      "required": false,
+      "default": "https://raw.githubusercontent.com/tgirotto/install-grafana/refs/heads/main/install-grafana.sh"
+    },
+    {
+      "name": "privateKey",
+      "description": "SSH private key for authentication",
+      "type": "string",
+      "required": true
+    },
+    {
+      "name": "user",
+      "description": "SSH username (e.g., ubuntu, root)",
+      "type": "string",
+      "required": true
+    },
+    {
+      "name": "host",
+      "description": "SSH host (IP address or hostname)",
+      "type": "string",
       "required": true
     }
   ],
   "steps": {
-    "get_droplet": {
+    "fetch_script": {
       "uses": "starthubhq/http-get-wasm:0.0.16",
-      "types": {
-        "HttpHeaders": {
-          "Content-Type": "string",
-          "Authorization": "string"
-        },
-        "HttpResponse": {
-          "status": "number",
-          "body": "object"
-        },
-        "HttpBody": "object"
-      },
       "inputs": [
+        "{{inputs[0]}}",
         {
-          "name": "url",
-          "type": "string",
-          "value": "https://api.digitalocean.com/v2/droplets/{{inputs[0].droplet_id}}"
-        },
-        {
-          "name": "headers",
-          "type": "HttpHeaders",
-          "value": {
-            "Authorization": "Bearer {{inputs[0].api_token}}"
-          }
+          "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8",
+          "User-Agent": "StartHub-Install-Grafana/1.0"
         }
-      ],
-      "outputs": [
-        {
-          "name": "response",
-          "type": "HttpResponse"
-        }
+      ]
+    },
+    "execute_script": {
+      "uses": "starthubhq/ssh:0.0.1",
+      "inputs": [
+        "{{inputs[1]}}",
+        "{{inputs[2]}}",
+        "{{inputs[3]}}",
+        "{{steps.fetch_script.outputs[0].body}}"
       ]
     }
   },
   "outputs": [
     {
-      "name": "droplet",
-      "type": "DigitalOceanDroplet",
-      "value": {
-        "id": "{{steps.get_droplet.outputs[0].body.droplet.id}}",
-        "name": "{{steps.get_droplet.outputs[0].body.droplet.name}}",
-        "memory": "{{steps.get_droplet.outputs[0].body.droplet.memory}}",
-        "vcpus": "{{steps.get_droplet.outputs[0].body.droplet.vcpus}}",
-        "disk": "{{steps.get_droplet.outputs[0].body.droplet.disk}}",
-        "locked": "{{steps.get_droplet.outputs[0].body.droplet.locked}}",
-        "status": "{{steps.get_droplet.outputs[0].body.droplet.status}}",
-        "kernel": "{{steps.get_droplet.outputs[0].body.droplet.kernel}}",
-        "created_at": "{{steps.get_droplet.outputs[0].body.droplet.created_at}}",
-        "features": "{{steps.get_droplet.outputs[0].body.droplet.features}}",
-        "backup_ids": "{{steps.get_droplet.outputs[0].body.droplet.backup_ids}}",
-        "snapshot_ids": "{{steps.get_droplet.outputs[0].body.droplet.snapshot_ids}}",
-        "image": "{{steps.get_droplet.outputs[0].body.droplet.image}}",
-        "size": "{{steps.get_droplet.outputs[0].body.droplet.size}}",
-        "size_slug": "{{steps.get_droplet.outputs[0].body.droplet.size_slug}}",
-        "networks": "{{steps.get_droplet.outputs[0].body.droplet.networks}}",
-        "region": "{{steps.get_droplet.outputs[0].body.droplet.region}}",
-        "tags": "{{steps.get_droplet.outputs[0].body.droplet.tags}}",
-        "volume_ids": "{{steps.get_droplet.outputs[0].body.droplet.volume_ids}}"
-      }
+      "name": "script_content",
+      "description": "The Grafana installation script content",
+      "type": "string",
+      "value": "{{steps.fetch_script.outputs[0].body}}"
+    },
+    {
+      "name": "execution_result",
+      "description": "SSH execution result",
+      "type": "string",
+      "value": "{{steps.execute_script.outputs[0].result}}"
     }
   ],
-  "types": {
-    "DigitalOceanDropletGetConfig": {
-      "api_token": {
-        "description": "Digital Ocean API token",
-        "type": "string",
-        "required": true
-      },
-      "droplet_id": {
-        "description": "ID of the droplet to retrieve",
-        "type": "number",
-        "required": true
-      }
-    },
-    "DigitalOceanDroplet": {
-      "id": "number",
-      "name": "string",
-      "memory": "number",
-      "vcpus": "number",
-      "disk": "number",
-      "locked": "boolean",
-      "status": "string",
-      "kernel": "object",
-      "created_at": "string",
-      "features": "array",
-      "backup_ids": "array",
-      "snapshot_ids": "array",
-      "image": "object",
-      "size": "object",
-      "size_slug": "string",
-      "networks": "object",
-      "region": "object",
-      "tags": "array",
-      "volume_ids": "array"
-    }
-  },
   "permissions": {
     "net": ["http", "https"]
   },
   "mirrors": [
-    "https://api.starthub.so/storage/v1/object/public/artifacts/starthubhq/do-get-droplet/0.0.1/artifact.zip"
+    
   ]
 }
