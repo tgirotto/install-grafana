@@ -8,6 +8,8 @@ sudo apt-get update -y
 sudo apt-get install -y adduser libfontconfig1 wget musl ca-certificates gnupg lsb-release
 
 # Add Grafana's official repository (modern method)
+# Remove existing keyring if it exists to avoid overwrite prompt
+sudo rm -f /usr/share/keyrings/grafana-archive-keyring.gpg
 wget -q -O - https://packages.grafana.com/gpg.key | sudo gpg --dearmor -o /usr/share/keyrings/grafana-archive-keyring.gpg
 echo "deb [signed-by=/usr/share/keyrings/grafana-archive-keyring.gpg] https://packages.grafana.com/oss/deb stable main" | sudo tee -a /etc/apt/sources.list.d/grafana.list
 
