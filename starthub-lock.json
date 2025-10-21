@@ -1,0 +1,120 @@
+{
+  "name": "do-get-droplet",
+  "description": "Get an existing droplet from Digital Ocean",
+  "version": "0.0.1",
+  "kind": "composition",
+  "manifest_version": 1,
+  "repository": "github.com/tgirotto/do-get-droplet",
+  "license": "MIT",
+  "inputs": [
+    {
+      "name": "droplet_config",
+      "type": "DigitalOceanDropletGetConfig",
+      "required": true
+    }
+  ],
+  "steps": {
+    "get_droplet": {
+      "uses": "starthubhq/http-get-wasm:0.0.16",
+      "types": {
+        "HttpHeaders": {
+          "Content-Type": "string",
+          "Authorization": "string"
+        },
+        "HttpResponse": {
+          "status": "number",
+          "body": "object"
+        },
+        "HttpBody": "object"
+      },
+      "inputs": [
+        {
+          "name": "url",
+          "type": "string",
+          "value": "https://api.digitalocean.com/v2/droplets/{{inputs[0].droplet_id}}"
+        },
+        {
+          "name": "headers",
+          "type": "HttpHeaders",
+          "value": {
+            "Authorization": "Bearer {{inputs[0].api_token}}"
+          }
+        }
+      ],
+      "outputs": [
+        {
+          "name": "response",
+          "type": "HttpResponse"
+        }
+      ]
+    }
+  },
+  "outputs": [
+    {
+      "name": "droplet",
+      "type": "DigitalOceanDroplet",
+      "value": {
+        "id": "{{steps.get_droplet.outputs[0].body.droplet.id}}",
+        "name": "{{steps.get_droplet.outputs[0].body.droplet.name}}",
+        "memory": "{{steps.get_droplet.outputs[0].body.droplet.memory}}",
+        "vcpus": "{{steps.get_droplet.outputs[0].body.droplet.vcpus}}",
+        "disk": "{{steps.get_droplet.outputs[0].body.droplet.disk}}",
+        "locked": "{{steps.get_droplet.outputs[0].body.droplet.locked}}",
+        "status": "{{steps.get_droplet.outputs[0].body.droplet.status}}",
+        "kernel": "{{steps.get_droplet.outputs[0].body.droplet.kernel}}",
+        "created_at": "{{steps.get_droplet.outputs[0].body.droplet.created_at}}",
+        "features": "{{steps.get_droplet.outputs[0].body.droplet.features}}",
+        "backup_ids": "{{steps.get_droplet.outputs[0].body.droplet.backup_ids}}",
+        "snapshot_ids": "{{steps.get_droplet.outputs[0].body.droplet.snapshot_ids}}",
+        "image": "{{steps.get_droplet.outputs[0].body.droplet.image}}",
+        "size": "{{steps.get_droplet.outputs[0].body.droplet.size}}",
+        "size_slug": "{{steps.get_droplet.outputs[0].body.droplet.size_slug}}",
+        "networks": "{{steps.get_droplet.outputs[0].body.droplet.networks}}",
+        "region": "{{steps.get_droplet.outputs[0].body.droplet.region}}",
+        "tags": "{{steps.get_droplet.outputs[0].body.droplet.tags}}",
+        "volume_ids": "{{steps.get_droplet.outputs[0].body.droplet.volume_ids}}"
+      }
+    }
+  ],
+  "types": {
+    "DigitalOceanDropletGetConfig": {
+      "api_token": {
+        "description": "Digital Ocean API token",
+        "type": "string",
+        "required": true
+      },
+      "droplet_id": {
+        "description": "ID of the droplet to retrieve",
+        "type": "number",
+        "required": true
+      }
+    },
+    "DigitalOceanDroplet": {
+      "id": "number",
+      "name": "string",
+      "memory": "number",
+      "vcpus": "number",
+      "disk": "number",
+      "locked": "boolean",
+      "status": "string",
+      "kernel": "object",
+      "created_at": "string",
+      "features": "array",
+      "backup_ids": "array",
+      "snapshot_ids": "array",
+      "image": "object",
+      "size": "object",
+      "size_slug": "string",
+      "networks": "object",
+      "region": "object",
+      "tags": "array",
+      "volume_ids": "array"
+    }
+  },
+  "permissions": {
+    "net": ["http", "https"]
+  },
+  "mirrors": [
+    "https://api.starthub.so/storage/v1/object/public/artifacts/starthubhq/do-get-droplet/0.0.1/artifact.zip"
+  ]
+}
