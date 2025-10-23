@@ -65,7 +65,7 @@
       "name": "execution_result",
       "description": "SSH execution result",
       "type": "string",
-      "value": "{{steps.execute_script.outputs[0].result}}"
+      "value": "{{steps.execute_script.outputs[0].stdout}}"
     }
   ],
   "permissions": {
